@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Форум</title>
+    <style>
+        .boxed {
+            width: 100%;
+            background: lightgray;
+            box-sizing: border-box;
+            padding: 10px;
+            margin-bottom: 10px;
+            word-wrap: break-word;
+        }
+
+        .heading {
+            font-weight: bold;
+            font-size: 1.5em;
+            margin-bottom: 5px;
+            max-width: 95%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .subtitle {
+            font-style: italic;
+            margin-bottom: 10px;
+            max-width: 100%;
+            overflow: hidden;
+        }
+
+        .name {
+            font-weight: bold;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .form-container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .send {
+            border-radius: 10px;
+            width: 50px;
+            height: 30px;
+            background: #1E90FF;
+            border: none;
+            color: white;
+        }
+
+        .send:hover {
+            background: #104E8B;
+        }
+
+        #back {
+            width: 30px;
+            height: 30px;
+            background: #DC143C;
+            border-radius: 10px;
+            border-color: #C11236;
+        }
+
+        #back:hover {
+            background: #C11236;
+        }
+    </style>
+</head>
+<body>
+
+    <button id="back" onclick="back()"><-</button>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('/add_comments')
+                .then(response => response.json())
+                .then(data => {
+                    const forumId = {{ id | tojson }};
+                    data[forumId].comments = data[forumId].comments.replace(/'/g, '"');
+
+                    console.log(data);
+                    let comments = JSON.parse(data[forumId].comments);
+                    let heading = data[forumId].heading;
+                    let subtitle = data[forumId].subtitle;
+
+                    const post = document.createElement('div');
+                    post.textContent = heading;
+                    post.classList.add('boxed');
+
+                    const subtitles = document.createElement('div');
+                    subtitles.innerText = subtitle;
+                    subtitles.classList.add('subtitle');
+
+                    const formContainer = document.createElement('div');
+                    formContainer.classList.add('form-container');
+
+                    const nameInput = document.createElement('input');
+                    nameInput.placeholder = 'Введите имя...';
+
+                    const commentInput = document.createElement('textarea');
+                    commentInput.placeholder = 'Введите комментарий...';
+                    commentInput.style.width = '100%';
+                    commentInput.style.height = '100px';
+
+                    const sendComment = document.createElement('button');
+                    sendComment.textContent = 'send';
+                    sendComment.classList.add('send');
+
+                    sendComment.addEventListener('click', function() {
+                        if (!nameInput.value || !commentInput.value) {
+                            alert('Заполните все поля');
+                            return;
+                        }
+
+                        fetch(`/forum_id=${forumId}/add_comment`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ name: nameInput.value, comment: commentInput.value }),
+                        }).then(() => window.location.href = `/forum_id=${forumId}`);
+                    });
+
+                    formContainer.appendChild(nameInput);
+                    formContainer.appendChild(commentInput);
+                    formContainer.appendChild(sendComment);
+
+                    document.body.appendChild(post);
+                    document.body.appendChild(subtitles);
+                    document.body.appendChild(formContainer);
+
+                    comments.forEach(comment => {
+                        const _comment = document.createElement('div');
+                        const name = document.createElement('div');
+                        name.innerHTML = comment.name
+                        name.style.fontWeight = 'bold'
+                        name.style.fontSize = '1.2em'
+
+                        _comment.classList.add('boxed');
+                        _comment.appendChild(name);
+
+                        const commentText = document.createElement('div');
+                        commentText.innerText = comment.comment
+                        _comment.appendChild(commentText);
+
+                        document.body.appendChild(_comment);
+                    });
+                });
+            });
+
+        function back(){
+            window.location.href = '/'
+        }
+    </script>
+</body>
+</html>

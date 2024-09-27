@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Создание поста</title>
+    <style>
+      /* Общие стили */
+      .heading {
+        display: flex;
+        width: 90%;
+        height: auto; /* Установлено auto для адаптивности */
+        background: lightgray;
+        margin-left: 5%; /* Смещаем блок влево */
+        margin-top: 20px; /* Отступ сверху */
+      }
+
+      #inputHeading {
+        width: 100%; /* Ширина 100%, чтобы заполнить контейнер */
+        height: 25px; /* Уменьшенная высота */
+        padding: 5px;
+        font-size: 1em; /* Стандартный размер текста */
+        background: lightgray;
+      }
+
+      #subtitle {
+        display: flex;
+        position: relative;
+        left: 5%;
+        width: 90%;
+        height: 100px; /* Увеличена высота для текстового поля */
+        padding: 5px;
+        font-size: 1em; /* Стандартный размер текста */
+        margin-top: 10px; /* Отступ сверху от текстового поля */
+        max-width: 90%;
+        min-width: 90%;
+      }
+
+      #createPost {
+        display: block; /* Изменено на block для корректного отображения */
+        position: relative;
+        width: 90%; /* Ширина 90% для адаптивности */
+        height: 35px; /* Увеличенная высота кнопки */
+        border-radius: 10px;
+        background: #1E90FF;
+        border-color: #1E90FF;
+        margin: 20px 5%; /* Отступ сверху и снизу, слева и справа */
+      }
+
+      #createPost:hover {
+        background: #104E8B;
+      }
+
+      /* Для экранов меньше 768px */
+      @media screen and (max-width: 768px) {
+        .heading {
+          width: 95%; /* Шире для мобильных устройств */
+        }
+
+        #inputHeading {
+          height: 35px; /* Увеличенная высота для мобильных */
+        }
+      }
+
+      /* Для экранов меньше 480px */
+      @media screen and (max-width: 480px) {
+        .heading {
+          width: 100%;
+        }
+
+        #inputHeading {
+          height: 30px; /* Еще меньше высота для маленьких экранов */
+        }
+
+        #createPost {
+          height: 30px; /* Меньшая высота кнопки для маленьких экранов */
+        }
+      }
+    </style>
+</head>
+<body>
+
+    <div class="heading">
+      <input type="title" id="inputHeading" placeholder="Введите заголовок...">
+    </div>
+
+    <textarea id="subtitle" placeholder="Введите текст..."></textarea>
+
+    <button id="createPost" onclick="createPost()">Опубликовать пост</button>
+
+    <script>
+      function createPost() {
+        const title = document.getElementById('inputHeading')
+        const subtitle = document.getElementById('subtitle')
+
+        if(!title.value && !subtitle.value){
+          alert('Заполните все поля');
+          return
+        }
+
+        fetch(`/public_post`, {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({heading: title.value, subtitle: subtitle.value}),
+        }).then(response => {
+          if (!response.ok){
+            alert('Неполадки с соединением.')
+            return
+          }
+
+          return response.json()
+        }).then(data => {
+          window.location.href = `/forum_id=${data['id']}`
+        })
+      }
+    </script>
+
+</body>
+</html>
